@@ -1,50 +1,64 @@
 #include "snake.h"
 
-Snake::Snake(int width, int height) {
-    m_headX = width / 2;
-    m_headY = height / 2;
-    m_dir = DIR_NONE;
+int gHeadX;
+int gHeadY;
+std::vector<Position> gTail;
+Direction gDir = DIR_NONE;
 
-    // si quieres, puedes empezar con cola vacía
-    // o añadir segmentos:
-    // m_tail.push_back({ m_headX - 1, m_headY });
+// Inicializa la serpiente en el centro del tablero
+void InitSnake(int width, int height) {
+    gHeadX = width / 2;
+    gHeadY = height / 2;
+    gDir = DIR_NONE;
+    gTail.clear();
 }
-
-void Snake::ChangeDirection(Direction newDir) {
-    if (m_dir == DIR_NONE) {
-        m_dir = newDir;
+// Cambia la dirección de la serpiente
+void ChangeDirection(Direction newDir) {
+    if (gDir == DIR_NONE) {
+        gDir = newDir;
         return;
     }
-
-    // Evitar girar 180°
-    if ((m_dir == DIR_UP && newDir == DIR_DOWN) ||
-        (m_dir == DIR_DOWN && newDir == DIR_UP) ||
-        (m_dir == DIR_LEFT && newDir == DIR_RIGHT) ||
-        (m_dir == DIR_RIGHT && newDir == DIR_LEFT)) {
+    if ((gDir == DIR_UP && newDir == DIR_DOWN) ||
+        (gDir == DIR_DOWN && newDir == DIR_UP) ||
+        (gDir == DIR_LEFT && newDir == DIR_RIGHT) ||
+        (gDir == DIR_RIGHT && newDir == DIR_LEFT)) {
         return;
     }
-
-    m_dir = newDir;
+    gDir = newDir;
 }
+// Actualiza la posición de la cabeza y la cola
+void UpdateSnake() {
+    if (gDir == DIR_NONE)
+        return;
 
-void Snake::Update() {
-    if (m_dir == DIR_NONE)
-        return; // aún no se ha empezado a mover
-
-    // mover cola
-    if (!m_tail.empty()) {
-        for (int i = (int)m_tail.size() - 1; i > 0; --i) {
-            m_tail[i] = m_tail[i - 1];
-        }
-        m_tail[0] = { m_headX, m_headY };
+    if (!gTail.empty()) {
+        for (int i = (int)gTail.size() - 1; i > 0; --i)
+            gTail[i] = gTail[i - 1];
+        gTail[0] = { gHeadX, gHeadY };
     }
 
-    // mover cabeza
-    switch (m_dir) {
-    case DIR_UP:    --m_headY; break;
-    case DIR_DOWN:  ++m_headY; break;
-    case DIR_LEFT:  --m_headX; break;
-    case DIR_RIGHT: ++m_headX; break;
+    switch (gDir) {
+    case DIR_UP:    --gHeadY; break;
+    case DIR_DOWN:  ++gHeadY; break;
+    case DIR_LEFT:  --gHeadX; break;
+    case DIR_RIGHT: ++gHeadX; break;
     default: break;
     }
+}
+// Añade un nuevo segmento al cuerpo
+void GrowSnake() {
+    Position newSeg = gTail.empty() ? Position{ gHeadX, gHeadY } : gTail.back();
+    gTail.push_back(newSeg);
+}
+// Verifica si la cabeza colisiona con la cola
+bool CheckSelfCollision() {
+    for (const auto& seg : gTail)
+        if (seg.x == gHeadX && seg.y == gHeadY)
+            return true;
+    return false;
+}
+// Verifica si la cabeza colisiona
+bool CheckWallCollision(int width, int height) {
+    return (gHeadX <= 0 || gHeadX >= width - 1 ||
+        gHeadY <= 0 || gHeadY >= height - 1);
 }

@@ -1,12 +1,11 @@
 #pragma once
 #include <vector>
-
-struct Position {
-    int x;
-    int y;
-};
+#include "position.h"
 
 extern const int WIDTH;
 extern const int HEIGHT;
-
-void DrawBoard(int headX, int headY, const std::vector<Position>& tail);
+// Dibuja el tablero de juego con límites, la serpiente, la fruta y la puntuación.
+void DrawBoard(int headX, int headY,
+    const std::vector<Position>& tail,
+    const Position& fruit,
+    int score);
